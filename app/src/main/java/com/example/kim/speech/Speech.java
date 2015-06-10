@@ -60,7 +60,7 @@ public class Speech extends ActionBarActivity {
     private ProgressDialog mProgressDialog;
     private BluetoothAdapter[] mBTAdapter;
     private BluetoothSocket[] mBTSocket;
-    private boolean hit = false;
+    private int hit = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,6 +182,8 @@ public class Speech extends ActionBarActivity {
         text.setOnClickListener(textOnclick);
         text = (TextView) findViewById(R.id.text2);
         text.setOnClickListener(textOnclick);
+
+        Log.d("Embedded", "onCreate Finish");
     }
 
     private ArrayList list;
@@ -230,6 +232,13 @@ public class Speech extends ActionBarActivity {
         }
     };
 
+    // 비올 확률 리턴
+    private static int rain = 0;
+    public static int getRain()
+    {
+        return rain;
+    }
+
     private class WeatherRequest extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
@@ -262,8 +271,10 @@ public class Speech extends ActionBarActivity {
                 CheckBox checkbox = (CheckBox) findViewById(R.id.checkbox);
                 if(rain>0 || checkbox.isChecked()){
                     // Send signal to ardoino
+                    rain = 1;
                     Log.i("Rain","비와요!!!");
                 }
+                else rain = 0;
 
             } catch (Exception e){
                 Log.i("RESPONSE", "error!");
@@ -329,24 +340,40 @@ public class Speech extends ActionBarActivity {
         {
             String action = intent.getAction();
 
+            Log.d("Embedded", "onReceive receives " + action);
             if (BluetoothDevice.ACTION_FOUND.equals(action))
             {
                 int found = -1;
 
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                Log.d("BTchat", device.getName());
+                if (device == null)
+                {
+                    Log.d("BTchat", "No device!");
+                    return ;
+                }
+
+                Log.d("BTchat", "device name: " + device.getName());
 
                 // 디바이스 잡기
-                if (device.getName().equals("mybt12")) found = 0;          // 우산
-                else if (device.getName().equals("핸드폰")) found = 1;     // 핸드폰
+                if (device.getName().equals("mybt12")) found = 0;            // 우산
+                else if (device.getName().equals("IM-A850S")) found = 1;     // 핸드폰
 
                 if (found == -1) return ;
 
                 Log.d("BTchat", "hit: " + device.getAddress());
-                hit = true;
-                mBTAdapter[found].cancelDiscovery();
+
+                // 둘 다 찾으면 메시지 삭제
+                if (mBTSocket[0] != null && mBTSocket[1] != null)
+                {
+                    hit++;
+                    mBTAdapter[0].cancelDiscovery();
+                    mBTAdapter[1].cancelDiscovery();
+                }
+
                 try
                 {
+                    if (mBTSocket[found] != null) return ;
+
                     mBTSocket[found] = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
                     mBTSocket[found].connect();
                     if (mBTSocket[found].isConnected())
@@ -359,13 +386,10 @@ public class Speech extends ActionBarActivity {
                 {
                     Log.d("Error", e.toString());
                 }
-
-                // 둘 다 찾으면 메시지 삭제
-                if (mBTSocket[0] != null && mBTSocket[1] != null) mProgressDialog.dismiss();
             }
             else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
             {
-                if (!hit) Log.d("BTchat", "Bluetooth device not found");
+                if (hit < 2) Log.d("BTchat", "Bluetooth device not found. " + hit + " device found.");
                 mProgressDialog.dismiss();
             }
         }
@@ -392,9 +416,14 @@ public class Speech extends ActionBarActivity {
             {
                 try
                 {
+                    if (Speech.getRain() == 1)
+                    {
+                        mHandler.obtainMessage(9999).sendToTarget();
+                    }
                     bytes = mIStream.read(buffer);
                     Log.d("BTchat", "IOThread: Read " + bytes + " bytes");
                     mHandler.obtainMessage(17, bytes, -1, buffer).sendToTarget();
+
                     buffer = new byte[1024];
                 }
                 catch (Exception e)
@@ -440,6 +469,21 @@ public class Speech extends ActionBarActivity {
                             buffer = new byte[1024];
                         }
                     }
+                }
+                else if (msg.what == 9999)
+                {
+                    Log.d("BTchat", "Will send rain alarm");
+                    buffer[0] = 'A';
+                    try
+                    {
+                        mOStream.write(buffer, 0, 2);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.e("Error", e.toString());
+                    }
+
+                    buffer = new byte[1024];
                 }
             }
         };
