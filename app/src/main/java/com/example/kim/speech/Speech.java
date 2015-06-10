@@ -233,10 +233,12 @@ public class Speech extends ActionBarActivity {
     };
 
     // 비올 확률 리턴
-    private static int rain = 0;
+    private static int isRain = 0;
     public static int getRain()
     {
-        return rain;
+        int ret = isRain;
+        isRain = 0;
+        return ret;
     }
 
     private class WeatherRequest extends AsyncTask<Void, Void, Void> {
@@ -250,8 +252,10 @@ public class Speech extends ActionBarActivity {
                 HttpResponse responseGet = client.execute(get);
                 HttpEntity resEntityGet = responseGet.getEntity();
                 double rain = 0;
-                if (resEntityGet != null) {                    JSONObject mainObject = new JSONObject(EntityUtils.toString(resEntityGet));
+                if (resEntityGet != null) {
+                    JSONObject mainObject = new JSONObject(EntityUtils.toString(resEntityGet));
 
+                    // 최근 9시간의 예상 강수량의 합 구하기
                     for(int i=0; i<3; i++) {
                         JSONObject threeh = mainObject.getJSONArray("list").getJSONObject(i);
                         if (threeh.has("rain")) {
@@ -271,10 +275,10 @@ public class Speech extends ActionBarActivity {
                 CheckBox checkbox = (CheckBox) findViewById(R.id.checkbox);
                 if(rain>0 || checkbox.isChecked()){
                     // Send signal to ardoino
-                    rain = 1;
+                    isRain = 1;
                     Log.i("Rain","비와요!!!");
                 }
-                else rain = 0;
+                else isRain = 0;
 
             } catch (Exception e){
                 Log.i("RESPONSE", "error!");
@@ -344,6 +348,7 @@ public class Speech extends ActionBarActivity {
             if (BluetoothDevice.ACTION_FOUND.equals(action))
             {
                 int found = -1;
+                String UUID_str = "";
 
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if (device == null)
@@ -355,8 +360,16 @@ public class Speech extends ActionBarActivity {
                 Log.d("BTchat", "device name: " + device.getName());
 
                 // 디바이스 잡기
-                if (device.getName().equals("mybt12")) found = 0;            // 우산
-                else if (device.getName().equals("IM-A850S")) found = 1;     // 핸드폰
+                if (device.getName().equals("mybt12"))            // 우산
+                {
+                    found = 0;
+                    UUID_str = "00001101-0000-1000-8000-00805f9b34fb";
+                }
+                else if (device.getName().equals("IM-A850S"))     // 핸드폰
+                {
+                    found = 1;
+                    UUID_str = "00000000-0000-1000-8000-00805F9B34FB";
+                }
 
                 if (found == -1) return ;
 
@@ -374,11 +387,11 @@ public class Speech extends ActionBarActivity {
                 {
                     if (mBTSocket[found] != null) return ;
 
-                    mBTSocket[found] = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
+                    mBTSocket[found] = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(UUID_str));
                     mBTSocket[found].connect();
                     if (mBTSocket[found].isConnected())
                     {
-                        IOThread mioThread = new IOThread(mBTSocket[found].getInputStream(), mBTSocket[found].getOutputStream());
+                        IOThread mioThread = new IOThread(found, mBTSocket[found].getInputStream(), mBTSocket[found].getOutputStream());
                         mioThread.start();
                     }
                 }
@@ -399,10 +412,12 @@ public class Speech extends ActionBarActivity {
     {
         private InputStream mIStream;
         private OutputStream mOStream;
+        private int type;
 
-        public IOThread(InputStream istream, OutputStream ostream)
+        public IOThread(int type, InputStream istream, OutputStream ostream)
         {
             super();
+            this.type = type;
             mIStream = istream;
             mOStream = ostream;
         }
@@ -416,15 +431,17 @@ public class Speech extends ActionBarActivity {
             {
                 try
                 {
-                    if (Speech.getRain() == 1)
+                    if (type == 0 && Speech.getRain() == 1) // 우산이면서 비오면
                     {
-                        mHandler.obtainMessage(9999).sendToTarget();
+                        Log.d("BTchat", "IOThread: send rain message");
+                        mOStream.write("A".getBytes());
+                        sleep(1000);
                     }
-                    bytes = mIStream.read(buffer);
-                    Log.d("BTchat", "IOThread: Read " + bytes + " bytes");
-                    mHandler.obtainMessage(17, bytes, -1, buffer).sendToTarget();
+                    //bytes = mIStream.read(buffer);
+                    //Log.d("BTchat", "IOThread: Read " + bytes + " bytes");
+                    //mHandler.obtainMessage(17, bytes, -1, buffer).sendToTarget();
 
-                    buffer = new byte[1024];
+                    //buffer = new byte[1024];
                 }
                 catch (Exception e)
                 {
@@ -432,6 +449,17 @@ public class Speech extends ActionBarActivity {
                     break;
                 }
             }
+
+            try
+            {
+                mIStream.close();
+                mOStream.close();
+            }
+            catch (Exception e)
+            {
+                Log.e("Error", e.toString());
+            }
+
         }
 
         Handler mHandler = new Handler()
