@@ -17,8 +17,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="26e6f860-e161-40d0-98e8-0d967ef5d155" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/kim/speech/Speech.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/kim/speech/Speech.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_speech.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_speech.xml" />
     </list>
     <ignored path="Embedded.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -49,8 +48,8 @@
       <file leaf-file-name="Speech.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/kim/speech/Speech.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="2.419183">
-              <caret line="148" column="17" selection-start-line="148" selection-start-column="17" selection-end-line="148" selection-end-column="17" />
+            <state vertical-scroll-proportion="0.30550623">
+              <caret line="78" column="0" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
               <folding>
                 <element signature="e#4145#4146#0" expanded="true" />
                 <element signature="e#4195#4196#0" expanded="true" />
@@ -867,8 +866,8 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_speech.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/kim/speech/Speech.java" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_speech.xml" />
       </list>
     </option>
   </component>
@@ -1208,7 +1207,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="534" y="0" width="1388" height="1040" extended-state="0" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3204983" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
@@ -1286,8 +1285,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/kim/speech/Speech.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="2.419183">
-          <caret line="148" column="17" selection-start-line="148" selection-start-column="17" selection-end-line="148" selection-end-column="17" />
+        <state vertical-scroll-proportion="0.30550623">
+          <caret line="78" column="0" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
           <folding>
             <element signature="e#4145#4146#0" expanded="true" />
             <element signature="e#4195#4196#0" expanded="true" />
