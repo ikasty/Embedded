@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -85,6 +86,7 @@ public class Speech extends ActionBarActivity {
             public void onResults(Bundle bundle) {
                 list = bundle.getStringArrayList(SpeechRecognizerClient.KEY_RECOGNITION_RESULTS);
                 bhandler.sendMessage(bhandler.obtainMessage());
+                changeStartHandler.sendMessage(changeStartHandler.obtainMessage());
             }
 
             @Override
@@ -134,6 +136,7 @@ public class Speech extends ActionBarActivity {
         text = (TextView) findViewById(R.id.text2);
         text.setOnClickListener(textOnclick);
     }
+
 
     private ArrayList list;
     final Handler bhandler = new Handler()
@@ -200,7 +203,6 @@ public class Speech extends ActionBarActivity {
                             rain += threeh.getDouble("3h");
                         }
                     }
-                    Log.i("강수량", String.valueOf(rain));
                 }
                 else {
                     rain = -1;
@@ -211,6 +213,12 @@ public class Speech extends ActionBarActivity {
                 msg.setData(data);
                 toastHandler.sendMessage(msg);
 
+                CheckBox checkbox = (CheckBox) findViewById(R.id.checkbox);
+                if(rain>0 || checkbox.isChecked()){
+                    // Send signal to ardoino
+                    Log.i("Rain","비와요!!!");
+                }
+
             } catch (Exception e){
                 Log.i("RESPONSE", "error!");
                 e.printStackTrace();
@@ -218,6 +226,13 @@ public class Speech extends ActionBarActivity {
             return null;
         }
     }
+    final Handler changeStartHandler = new Handler()
+    {
+        public void handleMessage(Message msg){
+            Button b = (Button) findViewById(R.id.speech_toggle);
+            b.setText("Start!");
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
