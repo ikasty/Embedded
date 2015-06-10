@@ -18,7 +18,6 @@
   <component name="ChangeListManager">
     <list default="true" id="26e6f860-e161-40d0-98e8-0d967ef5d155" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/java/com/example/kim/speech/Speech.java" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/kim/speech/Speech.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_speech.xml" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_speech.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="Embedded.iws" />
@@ -50,21 +49,18 @@
       <file leaf-file-name="Speech.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/kim/speech/Speech.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="5.831261">
-              <caret line="403" column="13" selection-start-line="403" selection-start-column="13" selection-end-line="403" selection-end-column="13" />
+            <state vertical-scroll-proportion="2.419183">
+              <caret line="148" column="17" selection-start-line="148" selection-start-column="17" selection-end-line="148" selection-end-column="17" />
               <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="class#3666:4823" expanded="false" />
-                <element signature="e#4139#4140#0" expanded="true" />
-                <element signature="e#4189#4190#0" expanded="true" />
-                <element signature="e#4264#4265#0" expanded="true" />
-                <element signature="e#4317#4318#0" expanded="true" />
-                <element signature="class#4954:5433" expanded="false" />
-                <element signature="class#7344:7680" expanded="false" />
-                <element signature="class#7720:7996" expanded="false" />
-                <element signature="class#10033:10211" expanded="false" />
+                <element signature="e#4145#4146#0" expanded="true" />
+                <element signature="e#4195#4196#0" expanded="true" />
+                <element signature="e#4270#4271#0" expanded="true" />
+                <element signature="e#4342#4343#0" expanded="true" />
+                <element signature="method#getRain#0;class#Speech#0" expanded="false" />
+                <element signature="method#getFindPhone#0;class#Speech#0" expanded="false" />
+                <element signature="class#WeatherRequest#0;class#Speech#0" expanded="false" />
+                <element signature="class#9487:9665" expanded="false" />
                 <element signature="method#onOptionsItemSelected#0;class#Speech#0" expanded="false" />
-                <element signature="method#onDestroy#0;class#Speech#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -880,8 +876,8 @@
     <order />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="578" />
-    <option name="width" value="1344" />
+    <option name="x" value="534" />
+    <option name="width" value="1388" />
     <option name="height" value="1040" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
@@ -1211,7 +1207,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="578" y="0" width="1344" height="1040" extended-state="0" />
+    <frame x="534" y="0" width="1388" height="1040" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -1227,9 +1223,9 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3295583" sideWeight="0.5031201" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3295583" sideWeight="0.49687988" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Android" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3295583" sideWeight="0.49687988" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.23208722" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.22439758" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
@@ -1248,7 +1244,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="13" />
+      <option name="time" value="15" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1290,21 +1286,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/kim/speech/Speech.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="5.831261">
-          <caret line="403" column="13" selection-start-line="403" selection-start-column="13" selection-end-line="403" selection-end-column="13" />
+        <state vertical-scroll-proportion="2.419183">
+          <caret line="148" column="17" selection-start-line="148" selection-start-column="17" selection-end-line="148" selection-end-column="17" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="class#3666:4823" expanded="false" />
-            <element signature="e#4139#4140#0" expanded="true" />
-            <element signature="e#4189#4190#0" expanded="true" />
-            <element signature="e#4264#4265#0" expanded="true" />
-            <element signature="e#4317#4318#0" expanded="true" />
-            <element signature="class#4954:5433" expanded="false" />
-            <element signature="class#7344:7680" expanded="false" />
-            <element signature="class#7720:7996" expanded="false" />
-            <element signature="class#10033:10211" expanded="false" />
+            <element signature="e#4145#4146#0" expanded="true" />
+            <element signature="e#4195#4196#0" expanded="true" />
+            <element signature="e#4270#4271#0" expanded="true" />
+            <element signature="e#4342#4343#0" expanded="true" />
+            <element signature="method#getRain#0;class#Speech#0" expanded="false" />
+            <element signature="method#getFindPhone#0;class#Speech#0" expanded="false" />
+            <element signature="class#WeatherRequest#0;class#Speech#0" expanded="false" />
+            <element signature="class#9487:9665" expanded="false" />
             <element signature="method#onOptionsItemSelected#0;class#Speech#0" expanded="false" />
-            <element signature="method#onDestroy#0;class#Speech#0" expanded="false" />
           </folding>
         </state>
       </provider>

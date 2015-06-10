@@ -100,7 +100,7 @@ public class Speech extends ActionBarActivity {
         SpeechRecognizerManager.getInstance().initializeLibrary(this);
         builder = new SpeechRecognizerClient.Builder().
                 setApiKey("076710d74a3fa3a441bfee2175219421").
-                setServiceType(SpeechRecognizerClient.SERVICE_TYPE_WEB);
+                setServiceType(SpeechRecognizerClient.SERVICE_TYPE_DICTATION);
         client = builder.build();
         client.setSpeechRecognizeListener(new SpeechRecognizeListener() {
             @Override
@@ -124,7 +124,7 @@ public class Speech extends ActionBarActivity {
 
             @Override
             public void onPartialResult(String s) {
-                Log.e("Speech123", s);
+                Log.e("SPEECH", "onPartialResult: " + s);
             }
 
             @Override
@@ -132,6 +132,21 @@ public class Speech extends ActionBarActivity {
                 list = bundle.getStringArrayList(SpeechRecognizerClient.KEY_RECOGNITION_RESULTS);
                 bhandler.sendMessage(bhandler.obtainMessage());
                 changeStartHandler.sendMessage(changeStartHandler.obtainMessage());
+
+                if (
+                    list.get(0).toString().contains("날씨") ||
+                    list.get(0).toString().contains("다녀오겠습니다"))
+                {
+                    new WeatherRequest().execute(null, null, null);
+                }
+
+                if (
+                        list.get(0).toString().contains("핸드폰") ||
+                        list.get(0).toString().contains("스마트폰")
+                        )
+                {
+                    isFindPhone = 1;
+                }
             }
 
             @Override
@@ -161,28 +176,6 @@ public class Speech extends ActionBarActivity {
             }
         });
 
-        // 텍스트 이벤트 등록
-        View.OnClickListener textOnclick = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i("speech_test", "test!");
-                TextView tv = (TextView) v;
-                String text = tv.getText().toString();
-                Bundle data = new Bundle();
-                data.putString("data", text);
-                Message msg = viewHandler.obtainMessage();
-                msg.setData(data);
-                viewHandler.sendMessage(msg);
-            }
-        };
-
-        TextView text = (TextView) findViewById(R.id.text0);
-        text.setOnClickListener(textOnclick);
-        text = (TextView) findViewById(R.id.text1);
-        text.setOnClickListener(textOnclick);
-        text = (TextView) findViewById(R.id.text2);
-        text.setOnClickListener(textOnclick);
-
         Log.d("Embedded", "onCreate Finish");
     }
 
@@ -210,18 +203,6 @@ public class Speech extends ActionBarActivity {
         }
     };
 
-    final Handler viewHandler = new Handler()
-    {
-        public void handleMessage(Message msg){
-            String text = msg.getData().getString("data");
-            Log.i("handleMsg", text);
-            if(text.equals("날씨")){
-                Log.i("handleMsg", "profit!");
-                new WeatherRequest().execute(null, null, null);
-            }
-        }
-    };
-
     final Handler toastHandler = new Handler()
     {
         public void handleMessage(Message msg){
@@ -238,6 +219,14 @@ public class Speech extends ActionBarActivity {
     {
         int ret = isRain;
         isRain = 0;
+        return ret;
+    }
+
+    private static int isFindPhone = 0;
+    public static int getFindPhone()
+    {
+        int ret = isFindPhone;
+        isFindPhone = 0;
         return ret;
     }
 
@@ -376,21 +365,18 @@ public class Speech extends ActionBarActivity {
                 Log.d("BTchat", "hit: " + device.getAddress());
 
                 // 둘 다 찾으면 메시지 삭제
-                if (mBTSocket[0] != null && mBTSocket[1] != null)
-                {
-                    hit++;
-                    mBTAdapter[0].cancelDiscovery();
-                    mBTAdapter[1].cancelDiscovery();
-                }
+                if (mBTSocket[0] != null || mBTSocket[1] != null) hit++;
 
                 try
                 {
                     if (mBTSocket[found] != null) return ;
 
+                    Log.d("BTchat", "Try to connect socket no" + found);
                     mBTSocket[found] = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(UUID_str));
                     mBTSocket[found].connect();
                     if (mBTSocket[found].isConnected())
                     {
+                        Log.d("BTchat", "Connected!");
                         IOThread mioThread = new IOThread(found, mBTSocket[found].getInputStream(), mBTSocket[found].getOutputStream());
                         mioThread.start();
                     }
@@ -435,6 +421,13 @@ public class Speech extends ActionBarActivity {
                     {
                         Log.d("BTchat", "IOThread: send rain message");
                         mOStream.write("A".getBytes());
+                        sleep(1000);
+                    }
+
+                    if (type == 1 && Speech.getFindPhone() == 1) // 핸드폰이면서 찾고있으면
+                    {//new WeatherRequest().execute(null, null, null);
+                        Log.d("BTchat", "IOThread: send phone message");
+                        mOStream.write("B".getBytes());
                         sleep(1000);
                     }
                     //bytes = mIStream.read(buffer);
