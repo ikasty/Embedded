@@ -1,7 +1,14 @@
 package com.example.kim.speech;
 
 import android.app.DownloadManager;
+import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
@@ -37,22 +44,60 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 public class Speech extends ActionBarActivity {
-    public SpeechRecognizerClient.Builder builder;
-    public SpeechRecognizerClient client;
+    private SpeechRecognizerClient.Builder builder;
+    private SpeechRecognizerClient client;
+
+    private TextView mTextView;
+    private ProgressDialog mProgressDialog;
+    private BluetoothAdapter[] mBTAdapter;
+    private BluetoothSocket[] mBTSocket;
+    private boolean hit = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_speech);
 
-        SpeechRecognizerManager.getInstance().initializeLibrary(this);
+        // receiver 등록
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        this.registerReceiver(mReceiver, filter);
 
+        filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        this.registerReceiver(mReceiver, filter);
+
+        // 연결중 메시지 출력
+        mProgressDialog = ProgressDialog.show(this, "", "connecting...");
+
+        // 로그 출력 뷰 설정
+        mTextView = (TextView)findViewById(R.id.textView);
+        mTextView.setTextSize(40);
+
+        // 내부 변수 선언
+        mBTAdapter = new BluetoothAdapter[2];
+        mBTSocket = new BluetoothSocket[2];
+        mBTSocket[0] = mBTSocket[1] = null;
+
+        // 블루투스 어댑터 설정
+        mBTAdapter[0] = BluetoothAdapter.getDefaultAdapter();
+        mBTAdapter[1] = BluetoothAdapter.getDefaultAdapter();
+
+        if (mBTAdapter[0].isDiscovering()) mBTAdapter[0].cancelDiscovery();
+        if (mBTAdapter[1].isDiscovering()) mBTAdapter[1].cancelDiscovery();
+
+        mBTAdapter[0].startDiscovery();
+        mBTAdapter[1].startDiscovery();
+
+        // 음성인식 init
+        SpeechRecognizerManager.getInstance().initializeLibrary(this);
         builder = new SpeechRecognizerClient.Builder().
                 setApiKey("076710d74a3fa3a441bfee2175219421").
                 setServiceType(SpeechRecognizerClient.SERVICE_TYPE_WEB);
@@ -98,6 +143,7 @@ public class Speech extends ActionBarActivity {
             }
         });
 
+        // 음성인식 버튼 등록
         Button button = (Button) findViewById(R.id.speech_toggle);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,6 +161,7 @@ public class Speech extends ActionBarActivity {
             }
         });
 
+        // 텍스트 이벤트 등록
         View.OnClickListener textOnclick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -136,7 +183,6 @@ public class Speech extends ActionBarActivity {
         text = (TextView) findViewById(R.id.text2);
         text.setOnClickListener(textOnclick);
     }
-
 
     private ArrayList list;
     final Handler bhandler = new Handler()
@@ -254,5 +300,148 @@ public class Speech extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        mBTAdapter[0].cancelDiscovery();
+        mBTAdapter[1].cancelDiscovery();
+        try
+        {
+            mBTSocket[0].close();
+            mBTSocket[1].close();
+        }
+        catch (Exception e)
+        {
+            Log.d("Error", e.toString());
+        }
+
+        SpeechRecognizerManager.getInstance().finalizeLibrary();
+    }
+
+    // 브로드캐스트 리시버
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver()
+    {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            String action = intent.getAction();
+
+            if (BluetoothDevice.ACTION_FOUND.equals(action))
+            {
+                int found = -1;
+
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                Log.d("BTchat", device.getName());
+
+                // 디바이스 잡기
+                if (device.getName().equals("mybt12")) found = 0;          // 우산
+                else if (device.getName().equals("핸드폰")) found = 1;     // 핸드폰
+
+                if (found == -1) return ;
+
+                Log.d("BTchat", "hit: " + device.getAddress());
+                hit = true;
+                mBTAdapter[found].cancelDiscovery();
+                try
+                {
+                    mBTSocket[found] = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805f9b34fb"));
+                    mBTSocket[found].connect();
+                    if (mBTSocket[found].isConnected())
+                    {
+                        IOThread mioThread = new IOThread(mBTSocket[found].getInputStream(), mBTSocket[found].getOutputStream());
+                        mioThread.start();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.d("Error", e.toString());
+                }
+
+                // 둘 다 찾으면 메시지 삭제
+                if (mBTSocket[0] != null && mBTSocket[1] != null) mProgressDialog.dismiss();
+            }
+            else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
+            {
+                if (!hit) Log.d("BTchat", "Bluetooth device not found");
+                mProgressDialog.dismiss();
+            }
+        }
+    };
+
+    private class IOThread extends Thread
+    {
+        private InputStream mIStream;
+        private OutputStream mOStream;
+
+        public IOThread(InputStream istream, OutputStream ostream)
+        {
+            super();
+            mIStream = istream;
+            mOStream = ostream;
+        }
+
+        public void run()
+        {
+            byte[] buffer = new byte[1024];
+            int bytes;
+
+            while (true)
+            {
+                try
+                {
+                    bytes = mIStream.read(buffer);
+                    Log.d("BTchat", "IOThread: Read " + bytes + " bytes");
+                    mHandler.obtainMessage(17, bytes, -1, buffer).sendToTarget();
+                    buffer = new byte[1024];
+                }
+                catch (Exception e)
+                {
+                    Log.e("Error", e.toString());
+                    break;
+                }
+            }
+        }
+
+        Handler mHandler = new Handler()
+        {
+            private String s = "Message received: ";
+            private byte[] buffer = new byte[1024];
+            private int i = 0;
+
+            @Override
+            public void handleMessage(Message msg)
+            {
+                if (msg.what == 17)
+                {
+                    byte[] readBuf = (byte[]) msg.obj;
+                    Log.d("BTchat", "Original message: " + new String(readBuf, 0, msg.arg1));
+
+                    for (int j = 0; j <= msg.arg1; j++)
+                    {
+                        if (readBuf[j] != ';')
+                        {
+                            buffer[i++] = readBuf[j];
+                        }
+                        else
+                        {
+                            mTextView.setText(s + new String(buffer, 0, i));
+                            try
+                            {
+                                mOStream.write(buffer, 0, i);
+                            }
+                            catch (Exception e)
+                            {
+                                Log.e("Error", e.toString());
+                            }
+                            i = 0;
+                            buffer = new byte[1024];
+                        }
+                    }
+                }
+            }
+        };
     }
 }

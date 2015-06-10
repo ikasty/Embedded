@@ -7,8 +7,9 @@
 
     <Button android:id="@+id/speech_toggle"
         android:layout_height="40dp"
-        android:layout_width="500dp"
-        android:text="Start!"/>
+        android:layout_width="fill_parent"
+        android:text="Start!"
+        android:layout_margin="20dp" />
     <TextView android:id="@+id/text0"
         android:layout_height="40dp"
         android:layout_width="500dp"
@@ -29,5 +30,11 @@
         android:layout_width="500dp"
         android:layout_below="@id/text2"
         android:text="우천 상황" />
+
+    <TextView android:id="@+id/textView"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:text="test"
+        android:layout_below="@+id/checkbox" />
 
 </RelativeLayout>
