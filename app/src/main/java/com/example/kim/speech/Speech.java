@@ -58,7 +58,7 @@ public class Speech extends ActionBarActivity {
 
     private TextView mTextView;
     private ProgressDialog mProgressDialog;
-    private BluetoothAdapter[] mBTAdapter;
+    private BluetoothAdapter mBTAdapter;
     private BluetoothSocket[] mBTSocket;
     private int hit = 0;
 
@@ -82,19 +82,13 @@ public class Speech extends ActionBarActivity {
         mTextView.setTextSize(40);
 
         // 내부 변수 선언
-        mBTAdapter = new BluetoothAdapter[2];
         mBTSocket = new BluetoothSocket[2];
         mBTSocket[0] = mBTSocket[1] = null;
 
         // 블루투스 어댑터 설정
-        mBTAdapter[0] = BluetoothAdapter.getDefaultAdapter();
-        mBTAdapter[1] = BluetoothAdapter.getDefaultAdapter();
-
-        if (mBTAdapter[0].isDiscovering()) mBTAdapter[0].cancelDiscovery();
-        if (mBTAdapter[1].isDiscovering()) mBTAdapter[1].cancelDiscovery();
-
-        mBTAdapter[0].startDiscovery();
-        mBTAdapter[1].startDiscovery();
+        mBTAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBTAdapter.isDiscovering()) mBTAdapter.cancelDiscovery();
+        mBTAdapter.startDiscovery();
 
         // 음성인식 init
         SpeechRecognizerManager.getInstance().initializeLibrary(this);
@@ -310,12 +304,11 @@ public class Speech extends ActionBarActivity {
     public void onDestroy()
     {
         super.onDestroy();
-        mBTAdapter[0].cancelDiscovery();
-        mBTAdapter[1].cancelDiscovery();
+        mBTAdapter.cancelDiscovery();
         try
         {
-            mBTSocket[0].close();
-            mBTSocket[1].close();
+            if (mBTSocket[0] != null) mBTSocket[0].close();
+            if (mBTSocket[1] != null) mBTSocket[1].close();
         }
         catch (Exception e)
         {
@@ -365,12 +358,13 @@ public class Speech extends ActionBarActivity {
                 Log.d("BTchat", "hit: " + device.getAddress());
 
                 // 둘 다 찾으면 메시지 삭제
-                if (mBTSocket[0] != null || mBTSocket[1] != null) hit++;
+                if (mBTSocket[found] == null) hit++;
+                else return ;
+
+                if (hit >= 2) mBTAdapter.cancelDiscovery();
 
                 try
                 {
-                    if (mBTSocket[found] != null) return ;
-
                     Log.d("BTchat", "Try to connect socket no" + found);
                     mBTSocket[found] = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(UUID_str));
                     mBTSocket[found].connect();
