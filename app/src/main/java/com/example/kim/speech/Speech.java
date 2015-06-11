@@ -49,6 +49,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -88,7 +89,16 @@ public class Speech extends ActionBarActivity {
         // 블루투스 어댑터 설정
         mBTAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBTAdapter.isDiscovering()) mBTAdapter.cancelDiscovery();
-        mBTAdapter.startDiscovery();
+
+        Set<BluetoothDevice> deviceList;
+        deviceList = mBTAdapter.getBondedDevices();
+        for (BluetoothDevice device : deviceList) {
+            processDevice(device);
+        }
+        if(hit < 2){
+            mBTAdapter.startDiscovery();
+        }
+
 
         // 음성인식 init
         SpeechRecognizerManager.getInstance().initializeLibrary(this);
@@ -329,9 +339,6 @@ public class Speech extends ActionBarActivity {
             Log.d("Embedded", "onReceive receives " + action);
             if (BluetoothDevice.ACTION_FOUND.equals(action))
             {
-                int found = -1;
-                String UUID_str = "";
-
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if (device == null)
                 {
@@ -340,45 +347,7 @@ public class Speech extends ActionBarActivity {
                 }
 
                 Log.d("BTchat", "device name: " + device.getName());
-
-                // 디바이스 잡기
-                if (device.getName().equals("mybt12"))            // 우산
-                {
-                    found = 0;
-                    UUID_str = "00001101-0000-1000-8000-00805f9b34fb";
-                }
-                else if (device.getName().equals("IM-A850S"))     // 핸드폰
-                {
-                    found = 1;
-                    UUID_str = "00000000-0000-1000-8000-00805F9B34FB";
-                }
-
-                if (found == -1) return ;
-
-                Log.d("BTchat", "hit: " + device.getAddress());
-
-                // 둘 다 찾으면 메시지 삭제
-                if (mBTSocket[found] == null) hit++;
-                else return ;
-
-                if (hit >= 2) mBTAdapter.cancelDiscovery();
-
-                try
-                {
-                    Log.d("BTchat", "Try to connect socket no" + found);
-                    mBTSocket[found] = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(UUID_str));
-                    mBTSocket[found].connect();
-                    if (mBTSocket[found].isConnected())
-                    {
-                        Log.d("BTchat", "Connected!");
-                        IOThread mioThread = new IOThread(found, mBTSocket[found].getInputStream(), mBTSocket[found].getOutputStream());
-                        mioThread.start();
-                    }
-                }
-                catch (Exception e)
-                {
-                    Log.d("Error", e.toString());
-                }
+                processDevice(device);
             }
             else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
             {
@@ -387,6 +356,49 @@ public class Speech extends ActionBarActivity {
             }
         }
     };
+
+    private void processDevice(BluetoothDevice device) {
+        String UUID_str = "";
+        int found = -1;
+        // 디바이스 잡기
+        if (device.getName().equals("mybt12"))            // 우산
+        {
+            found = 0;
+            UUID_str = "00001101-0000-1000-8000-00805f9b34fb";
+        }
+        else if (device.getName().equals("IM-A850S"))     // 핸드폰
+        {
+            found = 1;
+            UUID_str = "00000000-0000-1000-8000-00805F9B34FB";
+        }
+
+        if (found == -1) return ;
+
+        Log.d("BTchat", "hit: " + device.getAddress());
+
+        // 둘 다 찾으면 메시지 삭제
+        if (mBTSocket[found] == null) hit++;
+        else return ;
+
+        if (hit >= 2) mBTAdapter.cancelDiscovery();
+
+        try
+        {
+            Log.d("BTchat", "Try to connect socket no" + found);
+            mBTSocket[found] = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(UUID_str));
+            mBTSocket[found].connect();
+            if (mBTSocket[found].isConnected())
+            {
+                Log.d("BTchat", "Connected!");
+                IOThread mioThread = new IOThread(found, mBTSocket[found].getInputStream(), mBTSocket[found].getOutputStream());
+                mioThread.start();
+            }
+        }
+        catch (Exception e)
+        {
+            Log.d("Error", e.toString());
+        }
+    }
 
     private class IOThread extends Thread
     {
