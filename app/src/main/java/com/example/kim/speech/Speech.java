@@ -240,7 +240,7 @@ public class Speech extends ActionBarActivity {
             try
             {
                 HttpClient client = new DefaultHttpClient();
-                String getURL = "http://api.openweathermap.org/data/2.5/forecast?lat=35&lon=125";
+                String getURL = "http://api.openweathermap.org/data/2.5/forecast?lat=37.565784&lon=126.938572";
                 HttpGet get = new HttpGet(getURL);
                 HttpResponse responseGet = client.execute(get);
                 HttpEntity resEntityGet = responseGet.getEntity();
